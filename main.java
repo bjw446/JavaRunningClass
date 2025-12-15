@@ -41,6 +41,38 @@ public class main {
         nidalee.skill1(leesin);
         nidalee.skill2(leesin);
         nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill3(leesin);
+        nidalee.skill1(leesin);
+        nidalee.skill1(leesin);
+        nidalee.skill1(leesin);
+        nidalee.skill1(leesin);
+        nidalee.skill1(leesin);
+        nidalee.skill1(leesin);
+        nidalee.skill1(leesin);
+
+        System.out.println(leesin.getBattleCount());
+        System.out.println(jarvan.getBattleCount());
+        System.out.println(nidalee.getBattleCount());
+        System.out.println(sylas.getBattleCount());
 
 
 

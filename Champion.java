@@ -1,14 +1,17 @@
 package task01;
 
 public abstract class Champion {
-    private String name;
-    private int hp;
-    private int maxHp;
+    private final String name;
+    private double hp;
+    private double maxHp;
     private int attackDamage;
     private int defence;
     private int shield;
-    private Exp expClass;
+    private final Exp expClass;
     private int mp;
+    private static int battleCount = 0;
+    private long resurrectCoolTime = 60;
+    private long lastResurrectTime = 0;
 
     public Champion(String name, int hp, int maxHp, int mp, int attackDamage, int defence) {
         this.attackDamage = attackDamage;
@@ -19,6 +22,11 @@ public abstract class Champion {
         this.mp = mp;
         this.expClass = new Exp(this);
     }
+
+    public int getBattleCount() {
+        return battleCount;
+    }
+
 
     public int basicExp(){
         return expClass.getBasicExp();
@@ -72,12 +80,30 @@ public abstract class Champion {
             shield = 0;
             System.out.println(name + "이(가) " + actualDamage + " 피해를 입음! (남은 HP : " + hp + ")");
         }
+        resurrect();
+        battleCount++;
     }
 
     public void killedChampion(Champion target){
         if (target.getHp() <= 0) {
             System.out.println(name + "이(가) " + target.getName() + "을(를) 처치하여 경험치를 얻었습니다." );
             plusExp(100);
+        }
+    }
+
+    public final void resurrect() {
+        long currentTime = System.currentTimeMillis();
+        long cooltime = resurrectCoolTime * 1000L;
+
+        if (getHp() <= 0 ) {
+            if (lastResurrectTime == 0 || (currentTime - lastResurrectTime) >= cooltime) {
+                System.out.println("체력이 0 이하로 떨어져 사망하였습니다. 기본 체력의 20%로 부활 합니다.");
+                hp = maxHp * 0.2;
+                lastResurrectTime = currentTime;
+                System.out.println("(부활 후 HP : " + hp + ")");
+            } else {
+                System.out.println("부활 재사용 대기시간이 아직 남아 있습니다. (남은 재사용 대기시간 : " + (cooltime - (currentTime - lastResurrectTime)) / 1000L + ")");
+            }
         }
     }
 
@@ -100,7 +126,7 @@ public abstract class Champion {
         System.out.println(name + " 쉴드량 " + shield + " 증가 (남은 쉴드 : " + shield + ")");
     }
 
-    public int takeHeal(int healing) {
+    public double takeHeal(int healing) {
         if (maxHp > (hp + healing)) {
             hp = hp + healing;
             System.out.println(name + " 체력 " + healing + " 회복 (남은 체력 : " + hp + ")");
@@ -119,11 +145,13 @@ public abstract class Champion {
     public void plusExp(int plusE) {
         expClass.addExp(plusE);
     }
-    public void levelUpBonus(int level) {
+    public final void levelUpBonus(int level) {
             hp = hp + 50;
+            maxHp = maxHp + 50;
             attackDamage = attackDamage + 4;
             defence = defence + 5;
-            System.out.println("체력 + 100, 공격력 + 4, 방어력 + 5");
+            resurrectCoolTime = resurrectCoolTime + 5;
+            System.out.println("체력 + 50, 공격력 + 4, 방어력 + 5");
     }
 
     public String getName() {
@@ -135,7 +163,7 @@ public abstract class Champion {
     public int getShield() {
         return shield;
     }
-    public int getHp() {
+    public double getHp() {
         return hp;
     }
     public int getMp() {

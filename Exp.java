@@ -18,8 +18,11 @@ public class Exp {
         exp = exp + addE;
         levelUp();
     }
-    public void levelUp() {
+    public final void levelUp() {
         System.out.println("획득 경험치 : " + exp);
+        if (level >= GameConstants.MAX_LEVEL){
+            System.out.println("이미 최고 레벨입니다!");
+        }
         while (exp >= basicExp) {
             exp = exp - basicExp;
             level++;
