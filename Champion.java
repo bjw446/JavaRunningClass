@@ -1,5 +1,8 @@
 package task01;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class Champion {
     private final String name;
     private double hp;
@@ -12,6 +15,11 @@ public abstract class Champion {
     private static int battleCount = 0;
     private long resurrectCoolTime = 60;
     private long lastResurrectTime = 0;
+    private long airBorneTime = 0;
+    private long stunnedTime = 0;
+    private Status status = Status.ALIVE;
+    private Map<String, Long> coolTimeMap = new HashMap<>();
+
 
     public Champion(String name, int hp, int maxHp, int mp, int attackDamage, int defence) {
         this.attackDamage = attackDamage;
@@ -22,6 +30,8 @@ public abstract class Champion {
         this.mp = mp;
         this.expClass = new Exp(this);
     }
+
+
 
     public int getBattleCount() {
         return battleCount;
@@ -59,46 +69,53 @@ public abstract class Champion {
     }
     public void takeDamage(int damage) {
         int shieldDamage = shield - damage;
-        if(shield >= damage){
-            shield = shield - damage;
-            shieldDamage = 0;
-        }else if ((shield - damage) < 0) {
-            shieldDamage = damage - shield;
-        }
+        if(status == Status.ALIVE) {
+            if (shield >= damage) {
+                shield = shield - damage;
+                shieldDamage = 0;
+            } else if ((shield - damage) < 0) {
+                shieldDamage = damage - shield;
+            }
 
-        int actualDamage = shieldDamage - defence;
-        if (actualDamage < 0) {
-            actualDamage = 0;
-        }
+            int actualDamage = shieldDamage - defence;
+            if (actualDamage < 0) {
+                actualDamage = 0;
+            }
 
-        if ((hp - actualDamage) <= 0) {
-            System.out.println(name + " 사망!!!" );
-            shield = 0;
-            hp = 0;
-        }else {
-            hp = hp - actualDamage;
-            shield = 0;
-            System.out.println(name + "이(가) " + actualDamage + " 피해를 입음! (남은 HP : " + hp + ")");
+            if ((hp - actualDamage) <= 0) {
+                System.out.println(name + " 사망!!!");
+                shield = 0;
+                hp = 0;
+                status = Status.DEAD;
+            } else {
+                hp = hp - actualDamage;
+                shield = 0;
+                System.out.println(name + "이(가) " + actualDamage + " 피해를 입음! (남은 HP : " + hp + ")");
+            }
         }
         resurrect();
         battleCount++;
     }
 
     public void killedChampion(Champion target){
-        if (target.getHp() <= 0) {
+        if (target.getHp() <= 0 && target.status == Status.DEAD) {
             System.out.println(name + "이(가) " + target.getName() + "을(를) 처치하여 경험치를 얻었습니다." );
             plusExp(100);
+            target.status = Status.RESURRECT;
+        } else if (target.status == Status.RESURRECT){
+            System.out.println(target.getName() + "이(가) 이미 사망하였습니다. 대상을 찾을 수 없습니다.");
         }
     }
 
     public final void resurrect() {
-        long currentTime = System.currentTimeMillis();
         long cooltime = resurrectCoolTime * 1000L;
+        long currentTime = System.currentTimeMillis();
 
-        if (getHp() <= 0 ) {
+        if (getHp() <= 0 && (status != Status.ALIVE) ) {
             if (lastResurrectTime == 0 || (currentTime - lastResurrectTime) >= cooltime) {
                 System.out.println("체력이 0 이하로 떨어져 사망하였습니다. 기본 체력의 20%로 부활 합니다.");
                 hp = maxHp * 0.2;
+                status = Status.ALIVE;
                 lastResurrectTime = currentTime;
                 System.out.println("(부활 후 HP : " + hp + ")");
             } else {
@@ -106,14 +123,63 @@ public abstract class Champion {
             }
         }
     }
+    public final void airBorne(Champion target) {
+        target.status = Status.AIRBORNE;
+        long currentTime = System.currentTimeMillis();
+        target.airBorneTime = currentTime + 1000L;
+        System.out.println("상태 : 공중에뜸!");
+    }
+
+    public final void stunned(Champion target) {
+        target.status = Status.STUNNED;
+        long currentTime = System.currentTimeMillis();
+        target.stunnedTime = currentTime + 1000L;
+        System.out.println("상태 : 스턴!");
+    }
+
+    public final boolean statusAlive() {
+        long currentTime = System.currentTimeMillis();
+        if (status == Status.AIRBORNE && currentTime >= airBorneTime) {
+            status = Status.ALIVE;
+        } else if (status == Status.STUNNED && currentTime >= stunnedTime) {
+            status = Status.ALIVE;
+        }
+
+        if(status == Status.AIRBORNE) {
+            System.out.println("에어본 상태로 행동할 수 없습니다.");
+            return false;
+        } else if (status == Status.STUNNED) {
+            System.out.println("스턴 상태로 행동할 수 없습니다.");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean canSkillUse(String skillName, long coolTime) {
+        long currentTime = System.currentTimeMillis();
+        long lastUse = coolTimeMap.getOrDefault(skillName, 0L);
+        return lastUse == 0 || ((currentTime - lastUse) >= coolTime);
+    }
+
+    public void SkillUse(String skillName) {
+        long currentTime = System.currentTimeMillis();
+        coolTimeMap.put(skillName, currentTime);
+    }
 
     public void basicAttack(Champion target) {
+        if (!statusAlive()) {
+            return;
+        }
         double chance = 0.1;
-        int fetalDemage = 0;
-        if(Math.random() < chance) {
+        int fetalDamage = 0;
+        if (target.status == Status.DEAD) {
+            System.out.println(target.getName() + "이(가) 이미 사망하였습니다. 대상을 찾을 수 없습니다.");
+            return;
+        }
+        if (Math.random() < chance) {
             System.out.println(name + " -> " + target.name + " 치명타 공격!");
-            fetalDemage = attackDamage * 2;
-            target.takeDamage(fetalDemage);
+            fetalDamage = attackDamage * 2;
+            target.takeDamage(fetalDamage);
         } else {
             System.out.println(name + " -> " + target.name + " 기본 공격!");
             target.takeDamage(attackDamage);
@@ -121,6 +187,7 @@ public abstract class Champion {
         recoverMp(2);
         killedChampion(target);
     }
+
     public void takeShield(int shieldValue) {
         shield = shield + shieldValue;
         System.out.println(name + " 쉴드량 " + shield + " 증가 (남은 쉴드 : " + shield + ")");
@@ -183,5 +250,6 @@ public abstract class Champion {
     public abstract void passiveSkill();
 
     public abstract void passiveSkill2(Champion target);
+
 
 }

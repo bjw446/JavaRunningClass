@@ -1,79 +1,34 @@
 package task01;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class main {
     public static void main(String[] args) {
 
-        Leesin leesin = new Leesin("리신");
-        Nidalee nidalee = new Nidalee("니달리");
-        Jarvan jarvan = new Jarvan("자르반");
-        Sylas sylas = new Sylas("사일러스");
+        ChampionPool pool = new ChampionPool();
+        pool.addChampion(new Leesin("리신"));
+        pool.addChampion(new Jarvan("자르반"));
+        pool.addChampion(new Nidalee("니달리"));
+        pool.addChampion(new Sylas("사일러스"));
 
-        nidalee.basicAttack(leesin);
-        jarvan.basicAttack(leesin);
-        sylas.basicAttack(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        System.out.println("----------------");
+        Team<Champion> blue = new Team<>("블루");
+        Team<Champion> red = new Team<>("레드");
 
-        sylas.skill1(nidalee);
-        sylas.skill2(nidalee);
-        sylas.skill3(nidalee);
-        sylas.skill4(nidalee);
-        System.out.println("----------------");
+        blue.addMember(pool.get("리신"));
+        blue.addMember(pool.get("사일러스"));
 
-        leesin.skill1(jarvan);
-        leesin.skill2(jarvan);
-        leesin.skill3(jarvan);
-        leesin.skill4(jarvan);
-        System.out.println("----------------");
+        red.addMember(pool.get("자르반"));
+        red.addMember(pool.get("니달리"));
 
-        jarvan.skill1(sylas);
-        jarvan.skill2(sylas);
-        jarvan.skill3(sylas);
-        jarvan.skill4(sylas);
-        System.out.println("----------------");
 
-        nidalee.skill1(leesin);
-        nidalee.skill2(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill4(leesin);
-        nidalee.skill1(leesin);
-        nidalee.skill2(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill3(leesin);
-        nidalee.skill1(leesin);
-        nidalee.skill1(leesin);
-        nidalee.skill1(leesin);
-        nidalee.skill1(leesin);
-        nidalee.skill1(leesin);
-        nidalee.skill1(leesin);
-        nidalee.skill1(leesin);
+        System.out.println("블루팀 전체 체력 : " + blue.getTotalHp());
+        System.out.println("레드팀 전체 체력 : " + red.getTotalHp());
 
-        System.out.println(leesin.getBattleCount());
-        System.out.println(jarvan.getBattleCount());
-        System.out.println(nidalee.getBattleCount());
-        System.out.println(sylas.getBattleCount());
+        Battle.oneVsOne(blue, red);
 
+        System.out.println("블루팀 전체 체력 : " + blue.getTotalHp());
+        System.out.println("레드팀 전체 체력 : " + red.getTotalHp());
 
 
     }
